@@ -5,3 +5,12 @@
 .bar:hover {
   fill: brown;
 }
+
+// 提示信息样式
+.tooltip {
+  background-color: rgba(0, 0, 0, 0.80);
+  color: white;
+  text-align: center;
+  padding: 5px;
+  border-radius: 6px;
+}
