@@ -3,6 +3,7 @@ import {BarChartData} from '../../models/bar-chart-data';
 
 import * as d3 from 'd3';
 import {BarChartConfig} from '../../config/bar.chart.config';
+import {createColorCode} from '../../utils/color.utils';
 
 const defaults: BarChartConfig = {
   width: 100,
@@ -30,7 +31,6 @@ export class BarChartComponent implements OnInit, OnChanges {
 
   constructor() {
     // this.config = {...defaults, ...this.config};
-    console.log(this.config);
   }
 
   ngOnInit() {
@@ -47,13 +47,19 @@ export class BarChartComponent implements OnInit, OnChanges {
    * 重新构建图表，监控浏览器状态
    */
   onResize() {
-    this.createChart();
+    // this.createChart();
   }
 
   /**
    * 创建图表
    */
   private createChart(): void {
+
+    // 内置颜色
+    const colors = ['FFB6C1', 'DC143C', 'FFF0F5', 'DB7093', 'FF69B4', 'FF1493', 'C71585', 'DA70D6',
+      'FF00FF', '8B008B', '9400D3', '9932CC', '483D8B', 'FFA07A', 'E9967A', 'B22222', 'FFD700', '32CD32',
+      '90EE90', '3CB371', 'F5FFFA'];
+
     const element = this.chartContainer.nativeElement;
     const data = this.data;
 
@@ -128,7 +134,9 @@ export class BarChartComponent implements OnInit, OnChanges {
     g.selectAll('.bar')
       .data(data)
       .enter().append('rect')
-      .attr('class', 'bar')
+      .style('fill', function (d) {
+        return createColorCode(d.x, colors);
+      })
       .attr('x', d => x(d.x))
       .attr('y', d => y(d.y))
       .attr('width', x.bandwidth())
@@ -138,6 +146,39 @@ export class BarChartComponent implements OnInit, OnChanges {
         return tooltip
           .style('visibility', 'visible')
           .text(d.x + ' : ' + d.y);
+      })
+      .on('mousemove', function (d, i) {
+        return tooltip.style('top', (event.pageY - 40) + 'px').style('left', (event.pageX - 10) + 'px');
+      })
+      .on('mouseout', function (d, i) {
+        return tooltip.style('visibility', 'hidden');
+      });
+
+    // 数据图例
+    const legend = svg.append('g')
+      .attr('class', 'legend')
+      .attr('transform', 'translate(' + (offsetWidth - this.margin.left) / 4 + ', -20)');
+
+    legend.selectAll('rect')
+      .data(data)
+      .enter()
+      .append('rect')
+      .attr('x', function (d, i) {
+        return i * 25;
+      })
+      .attr('y', function (d, i) {
+        return 20;
+      })
+      .attr('width', 20)
+      .attr('height', 10)
+      .style('cursor', 'pointer')
+      .style('fill', function (d) {
+        return createColorCode(d.x, colors);
+      })
+      .on('mouseover', function (d, i) {
+        return tooltip
+          .style('visibility', 'visible')
+          .text(d.x);
       })
       .on('mousemove', function (d, i) {
         return tooltip.style('top', (event.pageY - 40) + 'px').style('left', (event.pageX - 10) + 'px');
